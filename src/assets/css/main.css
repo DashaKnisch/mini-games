@@ -1,0 +1,121 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f4f4f4;
+}
+
+header {
+    background: #35424a;
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+nav a:hover {
+    background: #e8491d;
+}
+
+.container {
+    flex: 1;
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+h2 {
+    text-align: center; /* Заголовок по центру */
+    margin-bottom: 30px;
+}
+
+.games-list {
+    display: flex;
+    flex-wrap: wrap; /* Разрешаем перенос карточек на следующую строку */
+    gap: 20px;
+    justify-content: flex-start; /* Начало ряда слева */
+}
+
+.game-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    width: calc((100% - 4 * 20px) / 5); /* 5 карточек в ряд с отступами */
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.game-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.game-icon.placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ddd;
+    width: 80px;
+    height: 80px;
+    font-size: 12px;
+    color: #555;
+}
+
+.game-info h3 {
+    margin: 10px 0 5px;
+    font-size: 16px;
+}
+
+.game-author {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.game-button {
+    display: inline-block;
+    background: #35424a;
+    color: #fff;
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.game-button:hover {
+    background: #e8491d;
+}
+
+footer {
+    text-align: center;
+    padding: 15px 0;
+    background: #35424a;
+    color: #fff;
+}

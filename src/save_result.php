@@ -2,18 +2,13 @@
 if (session_status() == PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/lib/database.php';
 
-// Проверка авторизации
 if (empty($_SESSION['user'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized']);
     exit;
 }
 
-// Получаем данные из JSON или POST
-$data = json_decode(file_get_contents('php://input'), true);
-if (!$data) {
-    $data = $_POST;
-}
+$data = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
 $game_id = isset($data['game_id']) ? (int)$data['game_id'] : 0;
 $score   = isset($data['score']) ? (int)$data['score'] : 0;
@@ -27,7 +22,6 @@ if ($game_id <= 0) {
 
 $userId = (int)$_SESSION['user']['id'];
 
-// Сохраняем результат в базу
 try {
     db_query(
         'INSERT INTO results (user_id, game_id, score, meta) VALUES (?, ?, ?, ?)',

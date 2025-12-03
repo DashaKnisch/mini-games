@@ -29,8 +29,14 @@ nav a:hover {
 
 .container {
     flex: 1;
-    width: 80%;
+    display: flex;
+    gap: 20px;
+    width: 90%;
     margin: 20px auto;
+}
+
+.form-column, .hint-column {
+    flex: 1;
     background: #fff;
     padding: 20px;
     border-radius: 6px;
@@ -62,6 +68,13 @@ nav a:hover {
 
 .game-form button:hover {
     background: #e8491d;
+}
+
+.hint-column pre {
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
 }
 
 footer {

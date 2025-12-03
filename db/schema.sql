@@ -21,6 +21,7 @@ CREATE TABLE `games` (
   `user_id` INT UNSIGNED NOT NULL,
   `title` VARCHAR(200) NOT NULL,
   `description` TEXT DEFAULT NULL,
+  `rules` TEXT DEFAULT NULL,
   `path` VARCHAR(500) NOT NULL,
   `icon_path` VARCHAR(500) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -29,7 +30,7 @@ CREATE TABLE `games` (
   CONSTRAINT `fk_games_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
+-- Таблица результатов
 DROP TABLE IF EXISTS `results`;
 CREATE TABLE `results` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -44,5 +45,28 @@ CREATE TABLE `results` (
   CONSTRAINT `fk_results_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_results_game` FOREIGN KEY (`game_id`) REFERENCES `games`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Таблица голосов (лайки/дизлайки)
+CREATE TABLE IF NOT EXISTS `game_votes` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `game_id` INT UNSIGNED NOT NULL,
+    `user_id` INT UNSIGNED NOT NULL,
+    `vote` TINYINT NOT NULL, -- 1 = лайк, -1 = дизлайк
+    UNIQUE KEY `unique_vote` (`game_id`, `user_id`),
+    CONSTRAINT `fk_game_votes_game` FOREIGN KEY (`game_id`) REFERENCES games(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_game_votes_user` FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Таблица комментариев
+CREATE TABLE IF NOT EXISTS `game_comments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `game_id` INT UNSIGNED NOT NULL,
+    `user_id` INT UNSIGNED NOT NULL,
+    `comment` TEXT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_game_comments_game` FOREIGN KEY (`game_id`) REFERENCES games(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_game_comments_user` FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 -- Конец схемы

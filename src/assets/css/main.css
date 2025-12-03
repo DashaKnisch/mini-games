@@ -113,6 +113,43 @@ h2 {
     background: #e8491d;
 }
 
+.game-votes {
+    display: flex;      /* кнопки в ряд */
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.game-votes form {
+    margin: 0;
+}
+
+.game-votes button {
+    display: inline-block;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #eee;  /* стандартный фон */
+    color: #333;             /* стандартный текст */
+    outline: none;
+}
+
+/* Лайк - зеленый */
+.game-votes button.liked {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb !important;
+}
+
+/* Дизлайк активный */
+.game-votes button.disliked {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+    border: 1px solid #f5c6cb !important;
+}
+
+
 footer {
     text-align: center;
     padding: 15px 0;

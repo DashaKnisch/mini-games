@@ -1,5 +1,5 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/lib/database.php';
 
 if (empty($_SESSION['user'])) {
@@ -9,12 +9,42 @@ if (empty($_SESSION['user'])) {
 
 $userId = (int)$_SESSION['user']['id'];
 
+// === Удаление игры ===
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_game_id'])) {
+    $deleteId = (int)$_POST['delete_game_id'];
+    $stmt = db_query('SELECT path FROM games WHERE id = ? AND user_id = ?', [$deleteId, $userId]);
+    $game = $stmt->fetch();
+    if ($game) {
+        $gameDir = __DIR__ . '/' . $game['path'];
+        if (is_dir($gameDir)) {
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($gameDir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($it as $file) {
+                $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+            }
+            rmdir($gameDir);
+        }
+        db_query('DELETE FROM games WHERE id = ?', [$deleteId]);
+        db_query('DELETE FROM results WHERE game_id = ?', [$deleteId]);
+        header('Location: /profile.php');
+        exit;
+    }
+}
+
 // Получаем игры пользователя
-$gamesStmt = db_query('SELECT id, title, path, icon_path, created_at FROM games WHERE user_id = ? ORDER BY created_at DESC', [$userId]);
+$gamesStmt = db_query('SELECT id, title, path, icon_path, description, created_at FROM games WHERE user_id = ? ORDER BY created_at DESC', [$userId]);
 $myGames = $gamesStmt->fetchAll();
 
-// Получаем результаты пользователя
-$resStmt = db_query('SELECT r.id, r.game_id, r.score, r.meta, r.played_at, g.title FROM results r JOIN games g ON r.game_id = g.id WHERE r.user_id = ? ORDER BY r.played_at DESC', [$userId]);
+// Получаем результаты пользователя (LEFT JOIN для сохранённых результатов)
+$resStmt = db_query("
+    SELECT r.id, r.game_id, r.score, r.meta, r.played_at, g.title
+    FROM results r
+    LEFT JOIN games g ON r.game_id = g.id
+    WHERE r.user_id = ?
+    ORDER BY r.played_at DESC
+", [$userId]);
 $results = $resStmt->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -52,8 +82,28 @@ $results = $resStmt->fetchAll();
                         <?php if(!empty($g['icon_path'])): ?>
                             <img src="/<?= ltrim($g['icon_path'],'/') ?>" alt="icon" class="game-icon">
                         <?php endif; ?>
-                        <strong><?= htmlspecialchars($g['title']) ?></strong>
-                        — <a href="/play.php?id=<?= (int)$g['id'] ?>">Играть</a>
+                        <div class="game-info">
+                            <strong><?= htmlspecialchars($g['title']) ?></strong>
+                            <?php if(!empty($g['description'])): ?>
+                                <p class="game-description"><?= htmlspecialchars($g['description']) ?></p>
+                            <?php endif; ?>
+                            <a href="/play.php?id=<?= (int)$g['id'] ?>" class="game-button">Играть</a>
+                        </div>
+                        <div class="game-actions" style="display: flex; gap: 10px; align-items: center; white-space: nowrap;">
+                            <a href="/edit_game.php?id=<?= (int)$g['id'] ?>" 
+                               style="display: inline-block; background-color: #35424a; color: #fff; padding: 6px 12px; border-radius: 3px; text-decoration: none; font-size: 0.9em;"
+                               class="edit-btn">Редактировать</a>
+
+                            <form method="post" class="delete-form" onsubmit="return confirm('Вы уверены, что хотите удалить игру?');" 
+                                style="margin: 0; display: inline-block;">
+                                <input type="hidden" name="delete_game_id" value="<?= (int)$g['id'] ?>">
+                                <button type="submit" class="delete-btn" 
+                                        style="color: white; background-color: red; border: none; padding: 6px 12px; cursor: pointer; border-radius: 3px; font-weight: bold;">
+                                    Удалить
+                                </button>
+                            </form>
+                        </div>
+
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -69,7 +119,7 @@ $results = $resStmt->fetchAll();
                 <tbody>
                     <?php foreach($results as $r): ?>
                         <tr>
-                            <td><?= htmlspecialchars($r['title']) ?></td>
+                            <td><?= htmlspecialchars($r['title'] ?? 'Игра удалена') ?></td>
                             <td><?= (int)$r['score'] ?></td>
                             <td><?= htmlspecialchars($r['played_at']) ?></td>
                         </tr>

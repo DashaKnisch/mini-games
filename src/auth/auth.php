@@ -4,6 +4,7 @@ require_once __DIR__ . '/../lib/database.php';
 
 // === LOGOUT ===
 if (($_GET['action'] ?? '') === 'logout') {
+    // Удаляем все данные сессии
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
@@ -13,11 +14,12 @@ if (($_GET['action'] ?? '') === 'logout') {
         );
     }
     session_destroy();
+    // Перенаправляем сразу на страницу входа
     header("Location: /auth/auth.php?mode=login");
     exit;
 }
 
-// Если уже авторизован, отправляем на главную
+// Если пользователь уже авторизован, перенаправляем на главную
 if (isset($_SESSION['user'])) {
     header('Location: /');
     exit;

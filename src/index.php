@@ -27,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id'], $_POST['vo
     exit;
 }
 
-// Получаем список всех игр с описанием + лайки/дизлайки
+// Получаем список всех игр с лайками/дизлайками
 try {
     $stmt = db_query("
-        SELECT g.id, g.title, g.description, g.icon_path, g.created_at, u.username,
+        SELECT g.id, g.title, g.icon_path, g.created_at, g.is_system, u.username,
             IFNULL(SUM(CASE WHEN v.vote=1 THEN 1 ELSE 0 END), 0) AS likes,
             IFNULL(SUM(CASE WHEN v.vote=-1 THEN 1 ELSE 0 END), 0) AS dislikes,
             COALESCE(
@@ -47,6 +47,10 @@ try {
 } catch (Exception $e) {
     $games = [];
 }
+
+// Разделяем на системные и пользовательские игры
+$systemGames = array_filter($games, fn($g) => $g['is_system'] == 1);
+$userGames = array_filter($games, fn($g) => $g['is_system'] == 0);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -70,13 +74,14 @@ try {
 </header>
 
 <main class="container">
-    <h2>Все игры пользователей</h2>
 
-    <?php if (empty($games)): ?>
-        <p class="no-games">Игры ещё не добавлены.</p>
+    <!-- Системные игры -->
+    <h2>Системные игры</h2>
+    <?php if (empty($systemGames)): ?>
+        <p class="no-games">Системные игры отсутствуют.</p>
     <?php else: ?>
         <div class="games-list">
-            <?php foreach ($games as $g): ?>
+            <?php foreach ($systemGames as $g): ?>
                 <div class="game-card">
                     <?php if (!empty($g['icon_path']) && file_exists(__DIR__ . '/' . ltrim($g['icon_path'], '/'))): ?>
                         <img class="game-icon" src="/<?= htmlspecialchars(ltrim($g['icon_path'], '/')); ?>" alt="icon">
@@ -87,9 +92,7 @@ try {
                     <div class="game-info">
                         <h3><?= htmlspecialchars($g['title']) ?></h3>
                         <p class="game-author">Автор: <?= htmlspecialchars($g['username']) ?></p>
-                        <?php if (!empty($g['description'])): ?>
-                            <p class="game-description"><?= nl2br(htmlspecialchars($g['description'])) ?></p>
-                        <?php endif; ?>
+
                         <a class="game-button" href="/play.php?id=<?= (int)$g['id'] ?>">Играть</a>
 
                         <!-- Лайки и дизлайки -->
@@ -112,6 +115,48 @@ try {
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+
+    <!-- Игры пользователей -->
+    <h2>Игры пользователей</h2>
+    <?php if (empty($userGames)): ?>
+        <p class="no-games">Игры пользователей отсутствуют.</p>
+    <?php else: ?>
+        <div class="games-list">
+            <?php foreach ($userGames as $g): ?>
+                <div class="game-card">
+                    <?php if (!empty($g['icon_path']) && file_exists(__DIR__ . '/' . ltrim($g['icon_path'], '/'))): ?>
+                        <img class="game-icon" src="/<?= htmlspecialchars(ltrim($g['icon_path'], '/')); ?>" alt="icon">
+                    <?php else: ?>
+                        <div class="game-icon placeholder">ICON</div>
+                    <?php endif; ?>
+
+                    <div class="game-info">
+                        <h3><?= htmlspecialchars($g['title']) ?></h3>
+                        <p class="game-author">Автор: <?= htmlspecialchars($g['username']) ?></p>
+
+                        <a class="game-button" href="/play.php?id=<?= (int)$g['id'] ?>">Играть</a>
+
+                        <!-- Лайки и дизлайки -->
+                        <div class="game-votes">
+                            <form method="post">
+                                <input type="hidden" name="game_id" value="<?= (int)$g['id'] ?>">
+                                <input type="hidden" name="vote" value="1">
+                                <button type="submit" class="<?= $g['user_vote']==1 ? 'liked' : '' ?>">👍 <?= (int)$g['likes'] ?></button>
+                            </form>
+
+                            <form method="post">
+                                <input type="hidden" name="game_id" value="<?= (int)$g['id'] ?>">
+                                <input type="hidden" name="vote" value="-1">
+                                <button type="submit" class="<?= $g['user_vote']==-1 ? 'disliked' : '' ?>">👎 <?= (int)$g['dislikes'] ?></button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
 </main>
 
 <footer>

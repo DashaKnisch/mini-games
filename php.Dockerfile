@@ -1,4 +1,4 @@
-FROM php:8.1-apache
+FROM php:8.1-apache 
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -6,6 +6,9 @@ RUN apt-get update \
     && docker-php-ext-install zip pdo_mysql \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
+
+# Копируем кастомный php.ini
+COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
 WORKDIR /var/www/html
 
@@ -16,3 +19,4 @@ RUN mkdir -p /var/www/html/repository \
 EXPOSE 80
 
 CMD ["apache2-foreground"]
+

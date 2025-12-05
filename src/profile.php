@@ -9,6 +9,10 @@ if (empty($_SESSION['user'])) {
 
 $userId = (int)$_SESSION['user']['id'];
 
+// === Получаем уведомления пользователя ===
+$messagesStmt = db_query("SELECT id, message, created_at FROM user_messages WHERE user_id = ? ORDER BY created_at DESC", [$userId]);
+$messages = $messagesStmt->fetchAll();
+
 // === Удаление игры ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_game_id'])) {
     $deleteId = (int)$_POST['delete_game_id'];
@@ -66,6 +70,18 @@ $results = $resStmt->fetchAll();
 
 <main class="container">
     <h2><?= htmlspecialchars($_SESSION['user']['username']) ?></h2>
+
+    <!-- Блок уведомлений -->
+    <?php if(!empty($messages)): ?>
+        <div class="user-messages" style="border:1px solid #f00; padding:10px; margin-bottom:20px; background:#fee;">
+            <h3>Уведомления:</h3>
+            <ul>
+                <?php foreach($messages as $m): ?>
+                    <li><?= htmlspecialchars($m['message']) ?> <small style="color:#666;">(<?= $m['created_at'] ?>)</small></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
 
     <div class="tabs">
         <button onclick="showTab('games')">Мои игры</button>

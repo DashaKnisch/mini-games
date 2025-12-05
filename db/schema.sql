@@ -1,6 +1,3 @@
--- SQL схема для MySQL
--- Файл создаёт таблицы users, games и results
-
 CREATE DATABASE IF NOT EXISTS `php_mini_games` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `php_mini_games`;
 

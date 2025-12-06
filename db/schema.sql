@@ -7,6 +7,7 @@ CREATE TABLE `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(100) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
+  `is_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -19,8 +20,10 @@ CREATE TABLE `games` (
   `title` VARCHAR(200) NOT NULL,
   `description` TEXT DEFAULT NULL,
   `rules` TEXT DEFAULT NULL,
+  `engine` VARCHAR(50) DEFAULT 'js',
   `path` VARCHAR(500) NOT NULL,
   `icon_path` VARCHAR(500) DEFAULT NULL,
+  `is_system` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
@@ -65,5 +68,14 @@ CREATE TABLE IF NOT EXISTS `game_comments` (
     CONSTRAINT `fk_game_comments_user` FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+-- Таблица сообщений пользователям
+CREATE TABLE IF NOT EXISTS `user_messages` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT UNSIGNED NOT NULL,
+    `message` TEXT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_user_messages_user` FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Конец схемы

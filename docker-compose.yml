@@ -6,8 +6,12 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./src:/var/www/html:cached
-      - repository_data:/var/www/html/repository
+      - ./public:/var/www/html:cached
+      - ./src:/var/www/html/src:cached
+      - ./repository:/var/www/html/repository:cached
+      - ./tests:/var/www/html/tests:cached
+      - ./phpunit.xml:/var/www/html/phpunit.xml:cached
+      - ./composer.json:/var/www/html/composer.json:cached
     environment:
       - DB_HOST=db
       - DB_PORT=3306
@@ -36,4 +40,3 @@ services:
 
 volumes:
   db_data:
-  repository_data:
